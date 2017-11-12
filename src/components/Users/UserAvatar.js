@@ -1,6 +1,6 @@
 import styles from './UserAvatar.less';
 import {connect} from 'dva';
-import {Button, Modal, Slider} from 'antd';
+import {Button, Modal, Slider, Icon} from 'antd';
 import ReactDom from 'react-dom';
 import AvatarEditor from 'react-avatar-editor'
 import {uploadImage} from "../../utils/request";
@@ -69,7 +69,10 @@ class UserAvatar extends React.Component {
              style={{top: this.state.profileY, left: this.state.profileX}}>
           <div className={styles['profile_mini__header']}>
             <img src={this.state.croppedImg}/>
-            <Cropper dispatch={this.props.dispatch}/>
+            <div  style={{display: `${this.props.currentUser.id !== this.props.user.id ? "none" : 'block'}`}}>
+              <Icon type="picture" />
+              <Cropper dispatch={this.props.dispatch}/>
+            </div>
           </div>
           <div className={styles['profile_mini__body']}>
             <div className={styles['nickname_area']}>
@@ -103,7 +106,7 @@ class FileUpload extends React.Component {
 
   render() {
     return (
-      <input ref="in" type="file" accept="image/*" onChange={this.handleFile}/>
+      <input ref="in" type="file" accept="image/*" title={this.props.title} onChange={this.handleFile}/>
     );
   }
 }
@@ -150,7 +153,7 @@ class Cropper extends React.Component {
     const {visible, confirmLoading, image, scale} = this.state;
     return (
       <div>
-        <FileUpload handleFileChange={this.handleFileChange}/>
+        <FileUpload handleFileChange={this.handleFileChange} title='点击以更换头像'/>
         <Modal style={{top: 20}} title="头像编辑" visible={visible} confirmLoading={confirmLoading}
                onCancel={this.handleCancel} onOk={this.submit}>
           <div className={styles['cropper']}>
@@ -184,7 +187,8 @@ function checkIsFriend(friends, user, current_user) {
 function mapStateToProps({users}, ownProps) {
   let friends = users.friends;
   let isFriend = checkIsFriend(friends, ownProps.user, users.info);
-  return {isFriend, friends, ...ownProps}
+  let currentUser = users.info;
+  return {isFriend, friends, currentUser, ...ownProps}
 }
 
 export default connect(mapStateToProps)(enhanceWithClickOutside(UserAvatar));
